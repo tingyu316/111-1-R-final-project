@@ -6,7 +6,9 @@ Files upload two steps:
   
   2. Have that person upload all relevant files under `https://github.com/that person's github username}/111-1-R-final-project`.
     The person visits his fored repo at `https://github.com/that person's github username}/111-1-R-final-project` then click **Add File** > **Upload Files**
-    ![Screenshot 2022-12-28 at 10 24 20 AM](https://user-images.githubusercontent.com/6549594/209747508-d82f3ef4-e42a-467b-903d-622b6bd78985.png)
+   
+   
+   ![Screenshot 2022-12-28 at 10 24 20 AM](https://user-images.githubusercontent.com/6549594/209747508-d82f3ef4-e42a-467b-903d-622b6bd78985.png)
 
 
 When submit your final project, put `https://github.com/that person's github username}/111-1-R-final-project` under Google code link at the [submission form](https://docs.google.com/forms/d/e/1FAIpQLSczkH4-WBZo8nz6VAQp4jQYnKIq7B0kguqUOuaI3S-LP7a9nA/viewform?usp=sf_link)
