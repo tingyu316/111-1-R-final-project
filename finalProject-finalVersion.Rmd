@@ -1,0 +1,342 @@
+---
+title: "Final project"
+date: "The Date"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, include = TRUE)
+```
+
+## Data Preparation
+
+### code
+
+
+```{r code1}
+# import data
+library(readr)
+enrollmentRate_department <- read_csv("data/學12-1.新生註冊率-以「系所」統計.csv")
+
+# rename chinese feature to english feature
+names(enrollmentRate_department)[c(1,2,5,7,8,10:14)] <-  # notice 10:14
+  c("schoolYear", "typeByFundingSource","school", "department","day_night", 
+  "freshmenFresh","freshmenOld","freshmenFreshRegistered",
+  "foreignStudentsRegistered", "netFreshmenRegistrationRate")
+
+# take out what we need for the project
+dfPartial = enrollmentRate_department[c(1,2,5,7,8,10:14)]
+
+# fix wrong classes
+library(magrittr)
+# elements 2 3 4 5 should be factor
+factorPos = c(2,3,4,5)
+dfPartial[[factorPos[[1]]]] %<>% factor()
+dfPartial[[factorPos[[2]]]] %<>% factor()
+dfPartial[[factorPos[[3]]]] %<>% factor()
+dfPartial[[factorPos[[4]]]] %<>% factor()
+
+# element 9 should be numeric
+numPos = c(9)
+dfPartial[[numPos]] %<>% as.numeric()
+
+# translate some chinese values to english
+
+levels(dfPartial$typeByFundingSource)
+# change to English
+levels(dfPartial$typeByFundingSource) <- c("public", "private")
+levels(dfPartial$typeByFundingSource)
+
+levels(dfPartial$day_night)
+levels(dfPartial$day_night) <- c("part-time","day","night")
+levels(dfPartial$day_night)
+
+# log
+project = list()
+project$data$enrollmentRate_department = list(
+  value=enrollmentRate_department,
+  description="enrollmentRate_department",
+  source="https://data.gov.tw/dataset/26228"
+)
+project$data$dfPartial = list(
+  value=dfPartial,
+  description="dfPartial",
+  source="enrollmentRate_department"
+)
+```
+
+### cleaning data
+
+
+```{r}
+project = readRDS("data/project.Rds")
+```
+
+> Before we start, we rename features in English and keep only those we need for the next-step analysis. We also did the levels-swapping trick to translate Chinese element values into English quickly. A thorough class check was done as well. Wrong classes have been fixed.
+
+
+## Preliminary Summary
+
+### code
+
+```{r code2}
+isNaMat = is.na(dfPartial) # isNaMat has matrix class
+# efficient information container
+naSummary <- list()
+for(.x in colnames(isNaMat)){ # matrix has only column names but not names
+  isNaMat[, .x] |> table() -> naSummary[[.x]]
+}
+
+project$summary$na <- naSummary
+```
+
+
+```{r code3}
+categoricalFeatures = c()
+numericalFeatures = c()
+featureNames = names(dfPartial)
+
+for(i in 1:length(featureNames))
+{
+  dfPartial[[featureNames[[i]]]] |> class() -> targetFeatureClass
+  targetFeatureClass
+  
+  flag_situationOneHappen <- targetFeatureClass == "numeric"
+  flag_situationTwoHappen <- targetFeatureClass == "factor"
+  if(flag_situationOneHappen){
+    numericalFeatures = c(numericalFeatures, featureNames[[i]])
+  } 
+  if(flag_situationTwoHappen){
+    categoricalFeatures = c(categoricalFeatures, featureNames[[i]])
+  }
+}
+project$features$categorial$name <- categoricalFeatures
+project$features$numerical$name <- numericalFeatures
+```
+
+
+```{r code4}
+categoricalSummary = list()
+for(.x in categoricalFeatures)
+{
+  dfPartial[[.x]] |> table() -> tableX
+  tableX |> prop.table() -> propTableX
+  categoricalSummary[[.x]] <- list(table=tableX, propTable=propTableX)
+}
+
+project$summary$categoricalFeatures <- categoricalSummary
+```
+
+
+```{r code5}
+numericSummary = list()
+for(.x in numericalFeatures){
+  dfPartial[[.x]] -> targetFeature
+  numericSummary[[.x]] <- list(
+    mean = mean(targetFeature, na.rm=TRUE),
+    median = median(targetFeature, na.rm=T),
+    range = range(targetFeature, na.rm=T)
+  )
+}
+
+project$summary$numericalFeatures <- numericSummary
+```
+
+
+```{r code6}
+# Import external scripts
+source("finalProject.R")
+# create a program feature
+dfPartial |> createProgramFeature() -> dfPartial$program
+
+# For each program, computes the average across years of the numerical features
+programMenu = unique(dfPartial$program)
+programSummary = vector("list", length(programMenu))
+names(programSummary) <- programMenu
+for(oneProgram in programMenu){
+  oneProgramSummary = 
+  summariseOneProgram(dfPartial, oneProgram, 
+                      numericalFeatures, summariseNumericFeature2)
+  programSummary[[oneProgram]] <- oneProgramSummary
+}
+```
+
+
+### Description
+
+Introduce your data.
+
+-   data source and entity.
+
+> The data is from Taiwan government open data platform. Each data entity is one tertiary education (高等教育）program. Each observation represents a certain program's freshmen registration rate.
+
+```{r}
+project$data$enrollmentRate_department$source |>
+  browseURL()
+```
+
+> The data consists of totally 42,900 observations with 10 features
+
+```{r}
+project$data$dfPartial$value |>
+  dplyr::glimpse()
+```
+
+> Among those features, each entity can be distinguished by the following three features:
+
+```{r}
+names(project$data$dfPartial$value)[c(3:5)]
+```
+
+> For one example, the following programming is from university **國立政治大學** under department **教育學系** for **day** time bachelor degrees.
+
+```{r}
+project$data$dfPartial$value[c(3:5)][1,]
+```
+
+> Totally there are 8,290 different programs.
+
+```{r}
+project$data$dfPartial$value[c(3:5)] |> unique()
+```
+
+> Each program was tracked from school year 106 (western calendar year 2017) to 110 (2021) -- if the program existed at the time.
+
+```{r}
+dfPartial = project$data$dfPartial$value
+dfPartial$schoolYear |> unique()
+```
+
+
+> Short summary: The data covers 8,290 tertiary educational programs from 2017 (school year 106) to 2021 (110) with total observations of 42,900 and ten features.
+
+
+### Summary
+
+#### NA
+
+
+```{r}
+project$summary$na$foreignStudentsRegistered
+```
+
+> The only feature that has missing values is **foreignStudentsRegistered**, which has 16,872 non-missing values and 26,028 missing values.
+
+
+#### Distribution
+
+> Now we look at features' distributions. The descriptions of feature data distribution are divided into two types depending on whether the feature is **categorical** or **numerical**, which can be distinguished by its class. The following program is capable of distinguish each feature's class:
+
+
+##### Categorical data: vector that has factor class
+
+> For categorical data, we focus on its frequency counts for each categories, as well as its proportion counts.
+
+
+```{r}
+project$summary$categoricalFeatures$typeByFundingSource
+# project$summary$categoricalFeatures$school
+# project$summary$categoricalFeatures$department
+project$summary$categoricalFeatures$day_night
+```
+
+> 46.91% of observations belong to a public university. Most of them are day time programs. 
+
+
+```{r}
+project$summary$categoricalFeatures$school$table |> sort() -> numberOfProgramsInEachSchool
+head(numberOfProgramsInEachSchool)
+tail(numberOfProgramsInEachSchool)
+```
+
+> School size based on its program number varies a lot -- from as small as one program in one university to as large as 1,467 programs.
+
+
+##### Numerical data
+
+> For numerical data, we look at its mean, median and range. 
+
+
+```{r}
+project$summary$numericalFeatures$freshmenFreshRegistered
+```
+
+> A program's freshmen size is divided into new freshmen, old freshmen (last year's freshmen who put his registration on hold for one year), and foreign students. For domestic freshment size, its mean is 35.2688 persons, median is 23, and a wide range from 0 to 740 persons.
+
+```{r}
+project$summary$numericalFeatures$freshmenOld
+```
+
+> As to those who hold the admission and return to register next year, the number of coming back is very small. This could mean that most of them successfully transfered to other program. 
+
+
+```{r}
+project$summary$numericalFeatures$foreignStudentsRegistered
+```
+> Foreign student regitered number is also very low. Be aware the average here is based on total observations, not total programs.
+
+
+#### Programs
+
+> Since each observation is a program's status in a given year, to understand ONE program we need to average its observations across years.
+
+
+## Exploration
+
+### code
+
+```{r code7}
+programMenu = names(programSummary)
+df=data.frame()
+for(i in seq_along(programMenu))
+{
+  programSummary[[i]] |> 
+    unlist() |> as.list() |> 
+    data.frame() -> targetProgramSummary
+  targetProgramSummary$program = programMenu[[i]]
+  df <- rbind(
+    df, targetProgramSummary
+  )
+}
+
+df |>
+  dplyr::relocate("program") -> df # this put program feature at the first column
+
+project$programs$summary <- programSummary
+project$programs$menu <- programMenu
+project$programs$dataframe <- df
+```
+
+### Total programs
+
+
+```{r}
+project$data$dfPartial$value |> nrow()
+project$programs$menu |> length()
+```
+
+> Even though there are 42,900 observations, totally there are 8,290 programs.
+
+### Foreign students quota
+
+```{r}
+project$programs$dataframe$foreignStudentsRegistered.mean |> 
+  is.na() |>
+  sum() 
+```
+
+> Among those programs, if its foreign students registered number is missing, it means this program can not admit any foreign students -- even if they are interested. The total count of those program is 1,323. Therefore, only 6,967 programs can admit foreign students -- accounting for 84 percent of total programs.
+
+### Fail to attract foreign students
+
+> But do all programs with foreign students quota do well?
+
+```{r}
+sum(project$programs$dataframe$foreignStudentsRegistered.mean == 0, na.rm=T) 
+```
+
+> If a foreign student admissible program fails to admit any foreign student, it's registration mean will be zero. We count the number of those programs. It turns out that 3,882 programs fail to attract any foreign students, which account for 55.72 percent of the foreign student admissible programs.
+
+## Conclusion
+
+> In our study, we found that Taiwan tertiary education system struggles to go international. Among all the programs, 84 percent are allowed by the ministry of education to admit foreign students. However, within those foreign student admissible programs, more than half attracts zero foreign student -- the exact share is 55.72 percent. "Why is Taiwan's tertiary education system so unattractive to the foreigners?"  would be the next step of a future research.
