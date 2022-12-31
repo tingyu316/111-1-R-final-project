@@ -5,7 +5,7 @@ Files upload two steps:
   1. Each group should have one person fork this repo by visiting <https://github.com/tpemartin/111-1-R-final-project/fork>.
   
   2. Have that person upload all relevant files under `https://github.com/that person's github username}/111-1-R-final-project`.
-    The person visits his fored repo at `https://github.com/that person's github username}/111-1-R-final-project` then click **Add File** > **Upload Files**
+    The person visits his fored repo at `https://github.com/{that person's github username}/111-1-R-final-project` then click **Add File** > **Upload Files**
    
    
    ![Screenshot 2022-12-28 at 10 24 20 AM](https://user-images.githubusercontent.com/6549594/209747508-d82f3ef4-e42a-467b-903d-622b6bd78985.png)
