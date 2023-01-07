@@ -1,0 +1,115 @@
+```{r}
+#取得飼料價格JSON
+library(jsonlite)
+feed = fromJSON('https://data.coa.gov.tw/service/opendata/agrstatUnit.aspx?item_code=225902100100',flatten=TRUE)
+
+# 確認有哪些資料
+summary(feed)
+
+# 確認每種資料有哪些內容
+#levels(as.factor(y$dname1))
+#levels(as.factor(y$date))
+
+# 取出月份作為X軸，但繪製時出現錯誤的內容(e.g. 10713~10799)，所以繪製時沒有使用
+xx <- feed$date[feed$dname1=="大豬飼料" & ((substr(feed$date, start=1, stop=3) > "106") & (feed$date != "110") & (feed$date != "109") & (feed$date != "108") & (feed$date != "107"))]
+# 取出10701 ~ 11110 的大豬飼料單價
+yy <- feed$value[feed$dname1=="大豬飼料" & ((substr(feed$date, start=1, stop=3) > "106") & (feed$date != "110") & (feed$date != "109") & (feed$date != "108") & (feed$date != "107"))]
+
+xx1 <- feed$date[feed$dname1=="中豬飼料" & ((substr(feed$date, start=1, stop=3) > "106") & (feed$date != "110") & (feed$date != "109") & (feed$date != "108") & (feed$date != "107"))]
+# 取出10701 ~ 11110 的中豬飼料單價
+yy1 <- feed$value[feed$dname1=="中豬飼料" & ((substr(feed$date, start=1, stop=3) > "106") & (feed$date != "110") & (feed$date != "109") & (feed$date != "108") & (feed$date != "107"))]
+
+#
+# 先繪製出10701 ~ 11110 的中豬飼料單價曲線圖
+plot(58:1,yy1, type="o",main="中/大豬飼料價格", ylab="元/公斤", ylim = c(12, 20), col="red")
+# 補充10701 ~ 11110 的大豬飼料單價曲線圖
+lines(58:1,yy, type="o", ylim = c(12, 20), col="blue")
+#從圖表可以發現大約從11001(110年1月)飼料價格開始大幅成長
+```
+
+
+```{r}
+#取得毛豬銷售資訊
+pig = fromJSON('https://data.coa.gov.tw/Service/OpenData/FromM/AnimalTransData.aspx',flatten=TRUE)
+```
+
+
+```{r}
+#summary(pig)
+#head(pig)
+#levels(as.factor(pig$`75(含)-95(不含)-平均重量`))
+#levels(as.factor(pig$`75(含)-95(不含)-平均價格`))
+#levels(as.factor(pig$交易日期))
+#levels(as.factor(pig$市場名稱))
+#取得11004 ~ 11109的毛豬交易行情
+pig_11004_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11004"]
+pig_11005_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11005"]
+pig_11006_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11006"]
+pig_11007_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11007"]
+pig_11008_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11008"]
+pig_11009_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11009"]
+pig_11010_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11010"]
+pig_11011_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11011"]
+pig_11012_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11012"]
+pig_11101_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11101"]
+pig_11102_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11102"]
+pig_11103_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11103"]
+pig_11104_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11104"]
+pig_11105_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11105"]
+pig_11106_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11106"]
+pig_11107_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11107"]
+pig_11108_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11108"]
+pig_11109_yy <- pig$`75(含)-95(不含)-平均價格`[pig$市場名稱=="臺南市" & substr(pig$交易日期, start=1, stop=5)== "11109"]
+
+# 因為數據會有0.00的資料，所以需先移除0.00的資料內容
+pig_11004_yy <- pig_11004_yy[-which(pig_11004_yy==0.00)]
+
+# 沒有0.00 的不需要移除，但需要逐筆確認
+pig_11005_yy
+pig_11006_yy
+pig_11007_yy
+pig_11008_yy
+pig_11009_yy
+pig_11010_yy
+pig_11011_yy <- pig_11011_yy[-which(pig_11011_yy==0.00)]
+pig_11011_yy
+pig_11012_yy
+pig_11101_yy
+pig_11102_yy <- pig_11102_yy[-which(pig_11102_yy==0.00)]
+pig_11102_yy
+pig_11103_yy <- pig_11103_yy[-which(pig_11103_yy==0.00)]
+pig_11103_yy
+pig_11104_yy <- pig_11104_yy[-which(pig_11104_yy==0.00)]
+pig_11104_yy
+
+pig_11105_yy
+pig_11106_yy
+
+pig_11107_yy <- pig_11107_yy[-which(pig_11107_yy==0.00)]
+pig_11107_yy
+pig_11108_yy
+
+pig_11109_yy <- pig_11109_yy[-which(pig_11109_yy==0.00)]
+pig_11109_yy
+
+# 計算每年每個月的平均毛豬價格
+pig_means <- list(mean(pig_11004_yy), mean(pig_11005_yy), mean(pig_11006_yy), mean(pig_11007_yy), mean(pig_11008_yy), mean(pig_11009_yy), mean(pig_11010_yy), mean(pig_11011_yy), mean(pig_11012_yy), mean(pig_11101_yy), mean(pig_11102_yy), mean(pig_11103_yy), mean(pig_11104_yy), mean(pig_11105_yy), mean(pig_11106_yy), mean(pig_11107_yy), mean(pig_11108_yy), mean(pig_11109_yy))
+pig_means
+```
+
+
+```{r}
+# 因為飼料從110年月開始上漲，但政府公開資料平台缺乏 10701 ~ 11010 的毛豬價格
+# 所以從以下網站去得毛豬每個月的平均價格
+# https://ppg.naif.org.tw/naif/mobile/Pages/twDayCompare.aspx
+#
+pig_means_editor = c(73.48,70.75,76.38,62.71,63.02,78.57,76.58,76.96,77.38,72.65,75.35,76.66,73.61,71.32,68.21,67.95,74.48,78.25,81.71,82.66,79.15,72.08,71.51,67.40,66.82,63.96,61.12,68.79,78.92,76.10,80.11,81.08,79.80,70.20,68.50,66.73,76.19,76.67,69.39,74.83,74.93,82.91,88.19,87.23,77.70,79.03)
+
+# 根據網路資料，飼料成本：養一頭豬每2.8-3：1飼料比，所以平均80公斤的豬需要240公斤的飼料
+# 150公斤的，要吃450公斤的飼料
+plot(1:18,pig_means,main = "毛豬平均價格",ylab = "價格" ,type="o", col="red")
+
+# 根據飼料的價格圖，110年開始，價格從15元上升到19元，等於養1隻150公斤的豬，光飼料的花費就要多出1800元，這還不算小豬的奶粉錢，每年的藥物費用等等。
+# 因此養豬戶只剩微薄的利潤
+```
+
